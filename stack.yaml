@@ -1,0 +1,6 @@
+packages:
+- .
+resolver:
+  compiler: ghc-9.4.2
+extra-deps:
+- split-0.2.3.5@sha256:f472fa7019647cacac3267742a6f7ac0a5c816f9890e80e4b826cd937436de87,2646
