@@ -2,12 +2,7 @@ module Day7
 ( day7,
 ) where
 
-data Object = Dir String | File Int String deriving Show
-data Command = LS [Object] | CD String
-data DirectoryData = DirectoryData {
-  dirRoot :: String,
-  dirSize :: Int
-} deriving Show
+data Command = LS Int | CD String
 
 day7 :: IO ()
 day7 = do
@@ -37,7 +32,7 @@ createSizeList commands = goBackToRootSize $ foldl createSizeList' ([],[]) comma
 createSizeList' :: ([Int], [Int]) -> Command -> ([Int], [Int])
 createSizeList' (sl, ps1:ps2:ps) (CD "..") = (ps1:sl, (ps2 + ps1):ps)
 createSizeList' (sl, ps) (CD _) = (sl, ps)
-createSizeList' (sl, ps) (LS objects) = (sl, (getDirectFolderSize objects):ps)
+createSizeList' (sl, ps) (LS directFolderSize) = (sl, directFolderSize:ps)
 
 goBackToRootSize :: ([Int], [Int]) -> [Int]
 goBackToRootSize (sl, ps) = fst $ foldl goBackToRootSize' (sl, ps) ps
@@ -46,13 +41,6 @@ goBackToRootSize' :: ([Int], [Int]) -> Int -> ([Int],[Int])
 goBackToRootSize' (sl,ps1:ps2:ps) _ = (ps1:sl, (ps2 + ps1):ps)
 goBackToRootSize' (sl,[p]) _ = (p:sl, [])
 goBackToRootSize' _ _ = error "Should never reach"
-
-getDirectFolderSize :: [Object] -> Int
-getDirectFolderSize objects = foldr (\x -> (+) (getDirectSize x)) 0 objects
-  where
-    getDirectSize :: Object -> Int
-    getDirectSize (Dir _) = 0
-    getDirectSize (File size _) = size
 
 parseCommands :: [String] -> [Command]
 parseCommands [] = []
@@ -69,13 +57,13 @@ parseCD ls = CD dir
     dir = drop 5 ls
 
 parseLS :: [String] -> ([String], Command)
-parseLS ls = (remainingLines, LS objects)
+parseLS ls = (remainingLines, LS directFolderSize)
   where
     (folderContents, remainingLines) = span (\x -> head x /= '$') ls
-    objects = map parseObject folderContents
+    directFolderSize = foldr (\x -> (+) (parseObject x)) 0 folderContents
 
-parseObject :: String -> Object
-parseObject object | typeOrSize == "dir" = Dir name
-                   | otherwise = File (read typeOrSize) name
+parseObject :: String -> Int
+parseObject object | typeOrSize == "dir" = 0
+                   | otherwise = read typeOrSize
   where
-    (typeOrSize, name) = span (\x -> x /= ' ') object
+    typeOrSize = takeWhile (\x -> x /= ' ') object
