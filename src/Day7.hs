@@ -2,8 +2,6 @@ module Day7
 ( day7,
 ) where
 
-import qualified Data.Map.Lazy as M
-
 data Object = Dir String | File Int String deriving Show
 data Command = LS [Object] | CD String
 data DirectoryData = DirectoryData {
@@ -11,58 +9,43 @@ data DirectoryData = DirectoryData {
   dirSize :: Int
 } deriving Show
 
-type DirectoryMap = M.Map String DirectoryData
-
 day7 :: IO ()
 day7 = do
   inp <- lines <$> readFile "data/day7.txt"
   let commands = parseCommands inp
-  let dMap = createDirectoryMap commands
-  putStrLn $ "Day 7 -  p1: " ++ (show $ p1 dMap) ++ ", p2: " ++ (show $ p2 dMap)
+  let sizeList = createSizeList commands
+  putStrLn $ "Day 7 -  p1: " ++ (show $ p1 sizeList) ++ ", p2: " ++ (show $ p2 sizeList)
 
-p1 :: DirectoryMap -> Int
-p1 dMap = foldr sumDirectories 0 dMap
+p1 :: [Int] -> Int
+p1 = foldr sumSizesLessThan 0
   where
-    sumDirectories :: DirectoryData -> Int -> Int
-    sumDirectories dir ts | dirSize dir > 100000 = ts
-                          | otherwise = dirSize dir + ts
+    sumSizesLessThan :: Int -> Int -> Int
+    sumSizesLessThan s total | s > 100000 = total
+                             | otherwise = s + total
 
-p2 :: DirectoryMap -> Int
-p2 dMap = findDirToDeleteSize
+p2 :: [Int] -> Int
+p2 sizes = foldl updateIfBestFit 70000000 sizes
   where
-    spaceUsed = dirSize $ dMap M.! "/"
-    extraSpaceRequired = 30000000 - (70000000 - spaceUsed)
-    findDirToDeleteSize = M.foldl (updateSizeIfDirMeetsCriteria extraSpaceRequired) 70000000 dMap
+    extraSpaceReq = 30000000 - (70000000 - (head sizes))
+    updateIfBestFit :: Int -> Int -> Int
+    updateIfBestFit currentBestSize candidateSize | candidateSize >= extraSpaceReq && candidateSize < currentBestSize = candidateSize
+                                                  | otherwise = currentBestSize
 
-updateSizeIfDirMeetsCriteria :: Int -> Int -> DirectoryData -> Int
-updateSizeIfDirMeetsCriteria spaceReq s dData | size >= spaceReq && size < s = size
-                                              | otherwise = s
-  where
-    size = dirSize dData
+createSizeList :: [Command] -> [Int]
+createSizeList commands = goBackToRootSize $ foldl createSizeList' ([],[]) commands
 
-createDirectoryMap :: [Command] -> DirectoryMap
-createDirectoryMap commands = goBackToRoot $ foldl createDirectoryMap' (M.empty, []) commands
+createSizeList' :: ([Int], [Int]) -> Command -> ([Int], [Int])
+createSizeList' (sl, ps1:ps2:ps) (CD "..") = (ps1:sl, (ps2 + ps1):ps)
+createSizeList' (sl, ps) (CD _) = (sl, ps)
+createSizeList' (sl, ps) (LS objects) = (sl, (getDirectFolderSize objects):ps)
 
-goBackToRoot :: (DirectoryMap, [String]) -> DirectoryMap
-goBackToRoot (dMap, []) = dMap
-goBackToRoot (dMap, (d:dirs)) = goBackToRoot (M.adjust (updateSize size) (dirRoot dirData) dMap, dirs)
-  where
-    dirData = dMap M.! (unwords $ d:dirs)
-    size = dirSize dirData
+goBackToRootSize :: ([Int], [Int]) -> [Int]
+goBackToRootSize (sl, ps) = fst $ foldl goBackToRootSize' (sl, ps) ps
 
-createDirectoryMap' :: (DirectoryMap, [String]) -> Command -> (DirectoryMap, [String])
-createDirectoryMap' (dMap, (d:dirs)) (CD "..") = (M.adjust (updateSize size) (dirRoot dirData) dMap, dirs)
-  where
-    dirData = dMap M.! (unwords $ d:dirs)
-    size = dirSize dirData
-
-createDirectoryMap' (dMap, dirs) (CD x) = (M.insert (unwords $ x:dirs) directoryData dMap, x:dirs)
-  where
-    directoryData = DirectoryData (unwords dirs) 0
-
-createDirectoryMap' (dMap, dirs) (LS objects) = (M.adjust (updateSize directFolderSize) (unwords dirs) dMap, dirs)
-  where
-    directFolderSize = getDirectFolderSize objects
+goBackToRootSize' :: ([Int], [Int]) -> Int -> ([Int],[Int])
+goBackToRootSize' (sl,ps1:ps2:ps) _ = (ps1:sl, (ps2 + ps1):ps)
+goBackToRootSize' (sl,[p]) _ = (p:sl, [])
+goBackToRootSize' _ _ = error "Should never reach"
 
 getDirectFolderSize :: [Object] -> Int
 getDirectFolderSize objects = foldr (\x -> (+) (getDirectSize x)) 0 objects
@@ -70,12 +53,6 @@ getDirectFolderSize objects = foldr (\x -> (+) (getDirectSize x)) 0 objects
     getDirectSize :: Object -> Int
     getDirectSize (Dir _) = 0
     getDirectSize (File size _) = size
-
-updateSize :: Int -> DirectoryData -> DirectoryData
-updateSize size dirData = DirectoryData root newSize
-  where
-    root = dirRoot dirData
-    newSize = size + dirSize dirData
 
 parseCommands :: [String] -> [Command]
 parseCommands [] = []
