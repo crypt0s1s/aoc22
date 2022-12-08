@@ -6,7 +6,7 @@ day7 :: IO ()
 day7 = do
   inp <- lines <$> readFile "data/day7.txt"
   let sizeList' = parseAndProcessCommands ([],[]) inp
-  putStrLn $ "Day 7 -  p1: " ++ (show $ p1 sizeList') ++ ", p2: " ++ (show $ p2 sizeList')
+  putStrLn $ "Day 7 - p1: " ++ (show $ p1 sizeList') ++ ", p2: " ++ (show $ p2 sizeList')
 
 p1 :: [Int] -> Int
 p1 = foldr sumSizesLessThan 0

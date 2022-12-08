@@ -14,7 +14,7 @@ day4 :: IO ()
 day4 = do
   inp <- lines <$> readFile "data/day4.txt"
   let (p1, p2) = foldr (\x -> (+++) (findSubsetsAndOverlap x)) (0, 0) inp
-  putStrLn $ "Day 4 -  p1: " ++ (show p1) ++ ", p2: " ++ (show p2)
+  putStrLn $ "Day 4 - p1: " ++ (show p1) ++ ", p2: " ++ (show p2)
 
 findSubsetsAndOverlap :: String -> (Int, Int)
 findSubsetsAndOverlap xs = (isAssignmentSubset assignment, isAssignmentOverlap assignment)

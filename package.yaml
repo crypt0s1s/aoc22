@@ -39,6 +39,7 @@ library:
   - split
   - containers
   - mtl
+  - clock
 
 executables:
   aoc22-exe:
@@ -50,6 +51,7 @@ executables:
     - -with-rtsopts=-N
     dependencies:
     - aoc22
+    - clock
 
 tests:
   aoc22-test:

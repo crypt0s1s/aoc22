@@ -21,7 +21,7 @@ day5 :: IO ()
 day5 = do
   inp <- lines <$> readFile "data/day5.txt"
   let (p1, p2) = moveCrates $ parseInput inp
-  putStrLn $ "Day 5 -  p1: " ++ (show p1) ++ ", p2: " ++ (show p2)
+  putStrLn $ "Day 5 - p1: " ++ (show p1) ++ ", p2: " ++ (show p2)
 
 moveCrates :: (CrateStackMap, [Action]) -> (String, String)
 moveCrates (crateStacks, actions) = (p1Result, p2Result)

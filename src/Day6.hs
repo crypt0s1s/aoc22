@@ -8,7 +8,7 @@ import qualified Data.Set as S
 day6 :: IO ()
 day6 = do
   inp <- readFile "data/day6.txt"
-  putStrLn $ "Day 6 -  p1: " ++ (show $ p1 inp) ++ ", p2: " ++ (show $ p2 inp)
+  putStrLn $ "Day 6 - p1: " ++ (show $ p1 inp) ++ ", p2: " ++ (show $ p2 inp)
 
 p1 :: String -> Int
 p1 inp = i

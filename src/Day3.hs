@@ -10,7 +10,7 @@ import Data.List.Split ( chunksOf )
 day3 :: IO ()
 day3 = do
   inp <- lines <$> readFile "data/day3.txt"
-  putStrLn $ "Day 3 -  p1: " ++ (show $ p1 inp) ++ ", p2: " ++ (show $ p2 inp)
+  putStrLn $ "Day 3 - p1: " ++ (show $ p1 inp) ++ ", p2: " ++ (show $ p2 inp)
 
 p1 :: [String] -> Int
 p1 = foldr (\x -> (+) (findPriorityOfDup x)) 0 

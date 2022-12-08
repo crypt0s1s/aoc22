@@ -9,7 +9,7 @@ day1 :: IO ()
 day1 = do
   inp <- lines <$> readFile "data/day1.txt"
   let gLines = splitOn [""] inp
-  putStrLn $ "Day 1 -  p1: " ++ (show $ p1 gLines) ++ ", p2: " ++ (show $ p2 gLines)
+  putStrLn $ "Day 1 - p1: " ++ (show $ p1 gLines) ++ ", p2: " ++ (show $ p2 gLines)
 
 p1 :: [[String]] -> Int
 p1 gLines = foldr (\x -> max (getSum x)) 0 gLines
